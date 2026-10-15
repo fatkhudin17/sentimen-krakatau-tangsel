@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analisis Sentiment Abu Vulkanik Anak Krakatau - Tangsel</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+    <header class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center">
+            <div class="flex items-center space-x-3 mb-2 sm:mb-0">
+                <div class="bg-indigo-600 p-2.5 rounded-xl shadow-md text-xl">
+                    <i class="fa-solid fa-volcano"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight">Apify Sentiment Tracker</h1>
+                    <p class="text-xs text-indigo-300">Monitoring Abu Vulkanik Anak Krakatau di Tangerang Selatan</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2 bg-indigo-900/60 px-3 py-1.5 rounded-full border border-indigo-700/50 text-xs font-medium">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>Data Scraped via Apify API (8 Sampel Terbaru)</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+        
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-4">
+                <div class="p-3.5 bg-blue-50 text-blue-600 rounded-xl text-xl">
+                    <i class="fa-solid fa-database"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-slate-500 font-medium">Total Sampel Data</p>
+                    <h3 class="text-2xl font-bold text-slate-800">8 Entri</h3>
+                </div>
+            </div>
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-4">
+                <div class="p-3.5 bg-rose-50 text-rose-600 rounded-xl text-xl">
+                    <i class="fa-solid fa-face-frown"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-slate-500 font-medium">Sentimen Negatif</p>
+                    <h3 class="text-2xl font-bold text-rose-600">50% <span class="text-xs font-normal text-slate-400">(4 data)</span></h3>
+                </div>
+            </div>
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-4">
+                <div class="p-3.5 bg-amber-50 text-amber-600 rounded-xl text-xl">
+                    <i class="fa-solid fa-face-meh"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-slate-500 font-medium">Sentimen Netral</p>
+                    <h3 class="text-2xl font-bold text-amber-600">37.5% <span class="text-xs font-normal text-slate-400">(3 data)</span></h3>
+                </div>
+            </div>
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-4">
+                <div class="p-3.5 bg-emerald-50 text-emerald-600 rounded-xl text-xl">
+                    <i class="fa-solid fa-face-smile"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-slate-500 font-medium">Sentimen Positif</p>
+                    <h3 class="text-2xl font-bold text-emerald-600">12.5% <span class="text-xs font-normal text-slate-400">(1 data)</span></h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 lg:col-span-1 flex flex-col justify-between">
+                <div>
+                    <h3 class="font-bold text-slate-800 mb-1 flex items-center gap-2">
+                        <i class="fa-solid fa-chart-pie text-indigo-600"></i> Distribusi Sentimen
+                    </h3>
+                    <p class="text-xs text-slate-500 mb-4">Persentase reaksi warga Tangsel di media sosial.</p>
+                </div>
+                <div class="relative w-full h-56 flex justify-center items-center">
+                    <canvas id="sentimentChart"></canvas>
+                </div>
+                <div class="mt-4 pt-3 border-t border-slate-100 text-xs text-slate-500 text-center">
+                    Sumber: Scraping Apify Actor (X/Twitter & Threads)
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 lg:col-span-2 flex flex-col justify-between">
+                <div>
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <h3 class="font-bold text-slate-800 mb-1 flex items-center gap-2">
+                                <i class="fa-solid fa-filter text-indigo-600"></i> Filter & Aksi Data
+                            </h3>
+                            <p class="text-xs text-slate-500">Pilih kategori sentimen untuk memfilter 8 data di bawah.</p>
+                        </div>
+                        <button onclick="resetFilter()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg transition font-medium">
+                            Reset Filter
+                        </button>
+                    </div>
+                    <div class="flex flex-wrap gap-2 mb-2">
+                        <button onclick="filterData('All')" class="filter-btn px-4 py-2 rounded-xl text-xs font-semibold bg-indigo-600 text-white shadow-sm transition">Semua (8)</button>
+                        <button onclick="filterData('Negatif')" class="filter-btn px-4 py-2 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">Negatif (4)</button>
+                        <button onclick="filterData('Netral')" class="filter-btn px-4 py-2 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">Netral (3)</button>
+                        <button onclick="filterData('Positif')" class="filter-btn px-4 py-2 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">Positif (1)</button>
+                    </div>
+                </div>
+                <div class="bg-indigo-50/50 p-4 rounded-xl border border-indigo-100 text-xs text-indigo-900 mt-4">
+                    <i class="fa-solid fa-circle-info mr-1 text-indigo-600"></i> Warga Tangerang Selatan melaporkan adanya bau belerang tipis dan debu halus di kendaraan, terutama di wilayah Ciputat dan BSD.
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+            <div class="p-6 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h3 class="font-bold text-slate-800 text-lg flex items-center gap-2">
+                        <i class="fa-solid fa-table-list text-indigo-600"></i> Dataset Apify: Sentimen Abu Vulkanik Tangsel
+                    </h3>
+                    <p class="text-xs text-slate-500">Tabel berisi 8 rekaman opini publik daerah Tangsel terpilih.</p>
+                </div>
+                <div class="relative w-full sm:w-64">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-search"></i>
+                    </span>
+                    <input type="text" id="searchInput" onkeyup="searchTable()" placeholder="Cari isi tweet/akun..." class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse" id="dataTable">
+                    <thead>
+                        <tr class="bg-slate-50/75 text-slate-500 uppercase text-[11px] font-bold tracking-wider border-b border-slate-100">
+                            <th class="py-3 px-4">No</th>
+                            <th class="py-3 px-4">Akun & Tanggal</th>
+                            <th class="py-3 px-4">Lokasi Tangsel</th>
+                            <th class="py-3 px-4">Isi Opini / Postingan</th>
+                            <th class="py-3 px-4">Sentimen</th>
+                            <th class="py-3 px-4">Engagement</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 text-xs" id="tableBody">
+                        <!-- Data row 1 -->
+                        <tr class="hover:bg-slate-50/50 transition data-row" data-sentiment="Negatif">
+                            <td class="py-3.5 px-4 font-semibold text-slate-400">1</td>
+                            <td class="py-3.5 px-4">
+                                <div class="font-bold text-slate-800">@budi_ciputat</div>
+                                <div class="text-[10px] text-slate-400">15 Okt 2026, 08:30</div>
+                            </td>
+                            <td class="py-3.5 px-4 font-medium text-slate-700">Ciputat, Tangsel</td>
+                            <td class="py-3.5 px-4 text-slate-600 max-w-xs sm:max-w-md">Parah banget kaca mobil berdebu putih tipis pagi ini, sempat bau belerang juga dikit daerah Gaplek. Anak Krakatau erosi lagi ya?</td>
+                            <td class="py-3.5 px-4">
+                                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-50 text-rose-600 border border-rose-100 inline-flex items-center gap-1">
+                                    <i class="fa-solid fa-circle text-[6px]"></i> Negatif
+                                </span>
+                            </td>
+                            <td class="py-3.5 px-4 text-slate-500">❤️ 42 | 🔄 12</td>
+                        </tr>
+                        <!-- Data row 2 -->
+                        <tr class="hover:bg-slate-50/50 transition data-row" data-sentiment="Netral">
+                            <td class="py-3.5 px-4 font-semibold text-slate-400">2</td>
+                            <td class="py-3.5 px-4">
+                                <div class="font-bold text-slate-800">@siti_bsd_update</div>
+                                <div class="text-[10px] text-slate-400">15 Okt 2026, 09:15</div>
+                            </td>
+                            <td class="py-3.5 px-4 font-medium text-slate-700">BSD City, Serpong</td>
+                            <td class="py-3.5 px-4 text-slate-600 max-w-xs sm:max-w-md">Ada kiriman abu vulkanik kah di BSD? Langit agak kabur dari pagi tapi udara masih lumayan terkontrol sih.</td>
+                            <td class="py-3.5 px-4">
+                                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-50 text-amber-600 border border-amber-100 inline-flex items-center gap-1">
+                                    <i class="fa-solid fa-circle text-[6px]"></i> Netral
+                                </span>
+                            </td>
+                            <td class="py-3.5 px-4 text-slate-500">❤️ 15 | 🔄 3</td>
+                        </tr>
+                        <!-- Data row 3 -->
+                        <tr class="hover:bg-slate-50/50 transition data-row" data-sentiment="Negatif">
+                            <td class="py-3.5 px-4 font-semibold text-slate-400">3</td>
+                            <td class="py-3.5 px-4">
+                                <div class="font-bold text-slate-800">@ritapamulang</div>
+                                <div class="text-[10px] text-slate-400">15 Okt 2026, 09:40</div>
+                            </td>
+                            <td class="py-3.5 px-4 font-medium text-slate-700">Pamulang Barat</td>
+                            <td class="py-3.5 px-4 text-slate-600 max-w-xs sm:max-w-md">Mata perih pas naik motor tadi di sekitar Pamulang Square. Abu Anak Krakatau fix nyampe Tangsel nih, pakai masker deh!</td>
+                            <td class="py-3.5 px-4">
+                                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-50 text-rose-600 border border-rose-100 inline-flex items-center gap-1">
+                                    <i class="fa-solid fa-circle text-[6px]"></i> Negatif
+                                </span>
+                            </td>
+                            <td class="py-3.5 px-4 text-slate-500">❤️ 89 | 🔄 27</td>
+                        </tr>
+                        <!-- Data row 4 -->
+                        <tr class="hover:bg-slate-50/50 transition data-row" data-sentiment="Positif">
+                            <td class="py-3.5 px-4 font-semibold text-slate-400">4</td>
+                            <td class="py-3.5 px-4">
+                                <div class="font-bold text-slate-800">@infobintaro_id</div>
+                                <div class="text-[10px] text-slate-400">15 Okt 2026, 10:05</div>
+                            </td>
+                            <td class="py-3.5 px-4 font-medium text-slate-700">Bintaro, Pondok Aren</td>
+                            <td class="py-3.5 px-4 text-slate-600 max-w-xs sm:max-w-md">Alhamdulillah cuaca Bintaro mendung teduh, abu vulkanik gak terlalu pekat di sini. Tetap waspada dan jaga kesehatan ya warga!</td>
+                            <td class="py-3.5 px-4">
+                                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-100 inline-flex items-center gap-1">
+                                    <i class="fa-solid fa-circle text-[6px]"></i> Positif
+                                </span>
+                            </td>
+                            <td class="py-3.5 px-4 text-slate-500">❤️ 120 | 🔄 34</td>
+                        </tr>
+                        <!-- Data row 5 -->
+                        <tr class="hover:bg-slate-50/50 transition data-row" data-sentiment="Netral">
+                            <td class="py-3.5 px-4 font-semibold text-slate-400">5</td>
+                            <td class="py-3.5 px-4">
+                                <div class="font-bold text-slate-800">@dimas_serpong</div>
+                                <div class="text-[10px] text-slate-400">15 Okt 2026, 10:20</div>
+                            </td>
+                            <td class="py-3.5 px-4 font-medium text-slate-700">Serpong Utara</td>
+                            <td class="py-3.5 px-4 text-slate-600 max-w-xs sm:max-w-md">Nunggu rilis resmi BMKG atau BPBD Tangsel nih soal status sebaran abu vulkanik Krakatau hari ini.</td>
+                            <td class="py-3.5 px-4">
+                                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-50 text-amber-600 border border-amber-100 inline-flex items-center gap-1">
+                                    <i class="fa-solid fa-circle text-[6px]"></i> Netral
+                                </span>
+                            </td>
+                            <td class="py-3.5 px-4 text-slate-500">❤️ 8 | 🔄 1</td>
+                        </tr>
+                        <!-- Data row 6 -->
+                        <tr class="hover:bg-slate-50/50 transition data-row" data-sentiment="Negatif">
+                            <td class="py-3.5 px-4 font-semibold text-slate-400">6</td>
+                            <td class="py-3.5 px-4">
+                                <div class="font-bold text-slate-800">@citra_jombang</div>
+                                <div class="text-[10px] text-slate-400">15 Okt 2026, 10:45</div>
+                            </td>
+                            <td class="py-3.5 px-4 font-medium text-slate-700">Jombang, Ciputat</td>
+                            <td class="py-3.5 px-4 text-slate-600 max-w-xs sm:max-w-md">Jemuran pakaian jadi kena debu abu vulkanik halus. Terpaksa harus dicuci ulang semua. Sungguh menguji kesabaran!</td>
+                            <td class="py-3.5 px-4">
+                                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-50 text-rose-600 border border-rose-100 inline-flex items-center gap-1">
+                                    <i class="fa-solid fa-circle text-[6px]"></i> Negatif
+                                </span>
+                            </td>
+                            <td class="py-3.5 px-4 text-slate-500">❤️ 31 | 🔄 5</td>
+                        </tr>
+                        <!-- Data row 7 -->
+                        <tr class="hover:bg-slate-50/50 transition data-row" data-sentiment="Netral">
+                            <td class="py-3.5 px-4 font-semibold text-slate-400">7</td>
+                            <td class="py-3.5 px-4">
+                                <div class="font-bold text-slate-800">@taufik_setu</div>
+                                <div class="text-[10px] text-slate-400">15 Okt 2026, 11:00</div>
+                            </td>
+                            <td class="py-3.5 px-4 font-medium text-slate-700">Setu, Tangsel</td>
+                            <td class="py-3.5 px-4 text-slate-600 max-w-xs sm:max-w-md">Kira-kira angin dari Selat Sunda ke arah Tangsel bakal bertahan berapa lama ya? Ada yang tahu info arah angin?</td>
+                            <td class="py-3.5 px-4">
+                                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-50 text-amber-600 border border-amber-100 inline-flex items-center gap-1">
+                                    <i class="fa-solid fa-circle text-[6px]"></i> Netral
+                                </span>
+                            </td>
+                            <td class="py-3.5 px-4 text-slate-500">❤️ 12 | 🔄 4</td>
+                        </tr>
+                        <!-- Data row 8 -->
+                        <tr class="hover:bg-slate-50/50 transition data-row" data-sentiment="Negatif">
+                            <td class="py-3.5 px-4 font-semibold text-slate-400">8</td>
+                            <td class="py-3.5 px-4">
+                                <div class="font-bold text-slate-800">@IbuReni_PondokCabe</div>
+                                <div class="text-[10px] text-slate-400">15 Okt 2026, 11:25</div>
+                            </td>
+                            <td class="py-3.5 px-4 font-medium text-slate-700">Pondok Cabe Udik</td>
+                            <td class="py-3.5 px-4 text-slate-600 max-w-xs sm:max-w-md">Anak-anak batuk ringan pas pulang sekolah karena udara agak berdebu abu vulkanik. Semoga aktivitas erupsi Krakatau cepat reda.</td>
+                            <td class="py-3.5 px-4">
+                                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-50 text-rose-600 border border-rose-100 inline-flex items-center gap-1">
+                                    <i class="fa-solid fa-circle text-[6px]"></i> Negatif
+                                </span>
+                            </td>
+                            <td class="py-3.5 px-4 text-slate-500">❤️ 65 | 🔄 19</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="p-4 bg-slate-50 border-t border-slate-100 flex flex-col sm:flex-row justify-between items-center text-xs text-slate-500">
+                <span id="rowCount">Menampilkan 8 dari 8 data</span>
+                <span class="mt-2 sm:mt-0">Apify Crawler Integration - Tangsel Sentiment Monitor</span>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="bg-white border-t border-slate-200 mt-12 py-6 text-center text-xs text-slate-500">
+        <p>&copy; 2026 Apify Analytics Dashboard. Data Sentimen Abu Vulkanik Anak Krakatau - Tangerang Selatan.</p>
+    </footer>
+
+    <script>
+        // Initialize Chart.js
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('sentimentChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Negatif (50%)', 'Netral (37.5%)', 'Positif (12.5%)'],
+                    datasets: [{
+                        data: [4, 3, 1],
+                        backgroundColor: [
+                            '#f43f5e', // Rose for negative
+                            '#f59e0b', // Amber for neutral
+                            '#10b981'  // Emerald for positive
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 12,
+                                font: {
+                                    family: 'Inter',
+                                    size: 11
+                                }
+                            }
+                        }
+                    },
+                    cutout: '65%'
+                }
+            });
+        });
+
+        // Filter function by sentiment category
+        function filterData(sentiment) {
+            const rows = document.querySelectorAll('.data-row');
+            const buttons = document.querySelectorAll('.filter-btn');
+            
+            // Update active button styles
+            buttons.forEach(btn => {
+                if(btn.textContent.includes(sentiment) || (sentiment === 'All' && btn.textContent.includes('Semua'))) {
+                    btn.className = "filter-btn px-4 py-2 rounded-xl text-xs font-semibold bg-indigo-600 text-white shadow-sm transition";
+                } else {
+                    btn.className = "filter-btn px-4 py-2 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition";
+                }
+            });
+
+            let visibleCount = 0;
+            rows.forEach(row => {
+                const rowSentiment = row.getAttribute('data-sentiment');
+                if (sentiment === 'All' || rowSentiment === sentiment) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            document.getElementById('rowCount').textContent = `Menampilkan ${visibleCount} dari 8 data`;
+        }
+
+        // Reset filter
+        function resetFilter() {
+            document.getElementById('searchInput').value = '';
+            filterData('All');
+        }
+
+        // Table search function
+        function searchTable() {
+            const input = document.getElementById('searchInput').value.toLowerCase();
+            const rows = document.querySelectorAll('.data-row');
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                if (text.includes(input)) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            document.getElementById('rowCount').textContent = `Menampilkan ${visibleCount} dari 8 data`;
+        }
+    </script>
+</body>
+</html>
